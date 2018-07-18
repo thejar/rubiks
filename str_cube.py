@@ -48,7 +48,55 @@ def display(c):
 def displayc(c):
     return display(color_cube(c))
 
-moves = {
+SHIFTS = {
+    'vert': [[
+        9 , 10, 11, 12, 13, 14, 15, 16, 17,
+        27, 28, 29, 30, 31, 32, 33, 34, 35,
+        24, 21, 18, 25, 22, 19, 26, 23, 20,
+        36, 37, 38, 39, 40, 41, 42, 43, 44,
+        0 ,  1,  2,  3,  4,  5,  6,  7,  8,
+        47, 50, 53, 46, 49, 52, 45, 48, 51], [
+        36, 37, 38, 39, 40, 41, 42, 43, 44,
+        0 ,  1,  2,  3,  4,  5,  6,  7,  8,
+        20, 23, 26, 19, 22, 25, 18, 21, 24,
+        9 , 10, 11, 12, 13, 14, 15, 16, 17,
+        27, 28, 29, 30, 31, 32, 33, 34, 35,
+        51, 48, 45, 52, 49, 46, 53, 50, 47]],
+    'side': [[
+        2 ,  5,  8,  1,  4,  7,  0,  3,  6,
+        47, 50, 53, 46, 49, 52, 45, 48, 51,
+        11, 14, 17, 10, 13, 16,  9, 12, 15,
+        33, 30, 27, 34, 31, 28, 35, 32, 29,
+        20, 23, 26, 19, 22, 25, 18, 21, 24,
+        38, 41, 44, 37, 40, 43, 36, 39, 42], [
+        6 ,  3,  0,  7,  4,  1,  8,  5,  2,
+        24, 21, 18, 25, 22, 19, 26, 23, 20,
+        42, 39, 36, 43, 40, 37, 44, 41, 38,
+        29, 32, 35, 28, 31, 34, 27, 30, 33,
+        51, 48, 45, 52, 49, 46, 53, 50, 47,
+        15, 12,  9, 16, 13, 10, 17, 14, 11]]}
+
+def make_shift(f, d, c):
+    return map(c.__getitem__, SHIFTS[f][d])
+
+def make_shifts(shift_lst, c):
+    for f, d in shift_lst:
+        c = make_shift(f, d, c)
+    return c
+
+def make_shifts_rev(shift_list, c):
+    return make_shifts(map(lambda m: (m[0], (m[1]+1)%2), shift_list[::-1]), c)
+
+def all_shifts(c):
+    for f in MOVES:
+        yield make_shift(f, 0, c), (f, 0)
+        yield make_shift(f, 1, c), (f, 1)
+
+def random_shift(c):
+    f, d = random.choice(MOVES.keys()), random.randint(0, 1)
+    return make_shift(f, d, c), (f, d)
+
+MOVES = {
     'right': [[
         0 ,  1, 11,  3,  4, 14,  6,  7, 17,
         9 , 10, 29, 12, 13, 32, 15, 16, 35,
@@ -128,20 +176,60 @@ moves = {
         42, 39, 36, 43, 40, 37, 44, 41, 38,
         0 ,  1,  2, 48, 49, 50, 51, 52, 53]]}
 
-def move(f, d, c):
-    return map(c.__getitem__, moves[f][d])
+def make_move(f, d, c):
+    return map(c.__getitem__, MOVES[f][d])
 
-def all_moves(c):
-    for f in moves:
-        yield f, 0, move(f, 0, c)
-        yield f, 1, move(f, 1, c)
-
-def random_move(c):
-    f, d = random.choice(moves.keys()), random.randint(0, 1)
-    return move(f, d, c), (f, d)
-
-def scramble(c, n=100):
-    for i in xrange(n):
-        c, move = random_move(c)
+def make_moves(move_lst, c):
+    for f, d in move_lst:
+        c = make_move(f, d, c)
     return c
 
+def make_moves_rev(move_list, c):
+    return make_moves(map(lambda m: (m[0], (m[1]+1)%2), move_list[::-1]), c)
+
+def all_moves(c):
+    for f in MOVES:
+        yield make_move(f, 0, c), (f, 0)
+        yield make_move(f, 1, c), (f, 1)
+
+def random_move(c):
+    f, d = random.choice(MOVES.keys()), random.randint(0, 1)
+    return make_move(f, d, c), (f, d)
+
+def scramble(c, n=100):
+    moves = []
+    for i in xrange(n):
+        c, move = random_move(c)
+        moves.append(move)
+    return c, moves
+
+def test():
+    for move in MOVES:
+        if make_move(move, 1, make_move(move, 0, range(54))) != range(54):
+            print 'error in move and back', move
+        if make_moves([(move, 0)]*4, range(54)) != range(54):
+            print 'error in move around forward', move
+        if make_moves([(move, 1)]*4, range(54)) != range(54):
+            print 'error in move around backward', move
+        if len(set(MOVES[move][0])) != 54:
+            print 'error in', move, 0
+        if len(set(MOVES[move][1])) != 54:
+            print 'error in', move, 1
+    for shift in SHIFTS:
+        if make_shift(shift, 1, make_shift(shift, 0, range(54))) != range(54):
+            print 'error in shift', shift
+        if make_shifts([(shift, 0)]*4, range(54)) != range(54):
+            print 'error in shift around forward', shift
+        if make_shifts([(shift, 1)]*4, range(54)) != range(54):
+            print 'error in shift around backward', shift
+        if len(set(SHIFTS[shift][0])) != 54:
+            print 'error in', shift, 0
+        if len(set(SHIFTS[shift][1])) != 54:
+            print 'error in', shift, 1
+        
+
+def main():
+    test()
+
+if __name__ == '__main__':
+    main()
