@@ -226,7 +226,11 @@ def test():
             print 'error in', shift, 0
         if len(set(SHIFTS[shift][1])) != 54:
             print 'error in', shift, 1
-        
+    for i in xrange(100):
+        c, moves = scramble(range(54))
+        if make_moves_rev(moves, c) != range(54):
+            print 'error in scramble/reverse'
+            break
 
 def main():
     test()
