@@ -88,7 +88,7 @@ def make_shifts_rev(shift_list, c):
     return make_shifts(map(lambda m: (m[0], (m[1]+1)%2), shift_list[::-1]), c)
 
 def all_shifts(c):
-    for f in MOVES:
+    for f in SHIFTS:
         yield make_shift(f, 0, c), (f, 0)
         yield make_shift(f, 1, c), (f, 1)
 
