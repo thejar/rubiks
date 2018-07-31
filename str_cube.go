@@ -2,8 +2,18 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	//"strings"
 )
+
+type Move struct {
+	f string
+	d int
+}
+
+func (m Move) rev() Move {
+	return Move{m.f, (m.d + 1) % 2}
+}
 
 const (
 	TOP    = 0
@@ -16,7 +26,8 @@ const (
 
 var (
 	colors = []string{"w", "o", "g", "y", "r", "b"}
-	SOLVED = []int{36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 0, 1, 2, 18, 19, 20, 48, 49, 50, 3, 4, 5, 21, 22, 23, 51, 52, 53, 6, 7, 8, 24, 25, 26, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29, 30, 31, 32, 33, 34, 35}
+	//SOLVED = []int{36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 0, 1, 2, 18, 19, 20, 48, 49, 50, 3, 4, 5, 21, 22, 23, 51, 52, 53, 6, 7, 8, 24, 25, 26, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 28, 29, 30, 31, 32, 33, 34, 35}
+	SOLVED = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53}
 	SHIFTS = map[string][][]int{
 		"vert": [][]int{[]int{
 			9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -125,24 +136,24 @@ var (
 			0, 1, 2, 48, 49, 50, 51, 52, 53}}}
 )
 
-func make_shift(f string, d int, c []int) []int {
+func make_shift(m Move, c []int) []int {
 	rc := make([]int, len(c))
-	for i, v := range c {
-		rc[i] = c[SHIFTS[f][d][i]]
+	for i := 0; i < len(c); i++ {
+		rc[i] = c[SHIFTS[m.f][m.d][i]]
 	}
 	return rc
 }
 
-func make_shifts(f []string, d []int, c []int) []int {
-	for i := 0; i < len(f); i++ {
-		c = make_shift(f[i], d[i], c)
+func make_shifts(m []Move, c []int) []int {
+	for i := 0; i < len(m); i++ {
+		c = make_shift(m[i], c)
 	}
 	return c
 }
 
-func make_shifts_rev(f []string, d []int, c []int) []int {
-	for i := len(f) - 1; i > -1; i-- {
-		c = make_shift(f[i], d[i], c)
+func make_shifts_rev(m []Move, c []int) []int {
+	for i := len(m) - 1; i > -1; i-- {
+		c = make_shift(m[i].rev(), c)
 	}
 	return c
 }
@@ -150,10 +161,83 @@ func make_shifts_rev(f []string, d []int, c []int) []int {
 func all_shifts(c []int) [][]int {
 	res := make([][]int, len(SHIFTS)*2)
 	for f := range SHIFTS {
-		res = append(res, make_shift(f, 0, c))
-		res = append(res, make_shift(f, 1, c))
+		res = append(res, make_shift(Move{f, 0}, c))
+		res = append(res, make_shift(Move{f, 1}, c))
 	}
 	return res
+}
+
+func random_shift(c []int) ([]int, Move) {
+	var m Move
+	i := 0
+	tf := rand.Intn(len(SHIFTS))
+	for face := range SHIFTS {
+		if i == tf {
+			m.f = face
+			break
+		}
+		i++
+	}
+	m.d = rand.Intn(2)
+	return make_shift(m, c), m
+}
+
+func make_move(m Move, c []int) []int {
+	//fmt.Println(display_i(c))
+	rc := make([]int, len(c))
+	for i := 0; i < len(c); i++ {
+		rc[i] = c[MOVES[m.f][m.d][i]]
+	}
+	return rc
+}
+
+func make_moves(m []Move, c []int) []int {
+	for i := 0; i < len(m); i++ {
+		c = make_move(m[i], c)
+	}
+	return c
+}
+
+func make_moves_rev(m []Move, c []int) []int {
+	for i := len(m) - 1; i > -1; i-- {
+		c = make_move(m[i].rev(), c)
+	}
+	return c
+}
+
+func all_moves(c []int) [][]int {
+	res := make([][]int, len(MOVES)*2)
+	for f := range MOVES {
+		// should be assign instead of append?
+		res = append(res, make_move(Move{f, 0}, c))
+		res = append(res, make_move(Move{f, 1}, c))
+	}
+	return res
+}
+
+func random_move(c []int) ([]int, Move) {
+	var m Move
+	i := 0
+	tf := rand.Intn(len(MOVES))
+	for face := range MOVES {
+		if i == tf {
+			m.f = face
+			break
+		}
+		i++
+	}
+	m.d = rand.Intn(2)
+	return make_move(m, c), m
+}
+
+func scramble(c []int, n int) ([]int, []Move) {
+	moves := make([]Move, n)
+	var m Move
+	for i := 0; i < n; i++ {
+		c, m = random_move(c)
+		moves[i] = m
+	}
+	return c, moves
 }
 
 func color_cube(c []int) []string {
@@ -168,13 +252,63 @@ func display_s(c []string) string {
 	return fmt.Sprintf("          %2s %2s %2s\n          %2s %2s %2s\n          %2s %2s %2s\n\n%2s %2s %2s  %2s %2s %2s  %2s %2s %2s\n%2s %2s %2s  %2s %2s %2s  %2s %2s %2s\n%2s %2s %2s  %2s %2s %2s  %2s %2s %2s\n\n          %2s %2s %2s\n          %2s %2s %2s\n          %2s %2s %2s\n\n          %2s %2s %2s\n          %2s %2s %2s\n          %2s %2s %2s", c[36], c[37], c[38], c[39], c[40], c[41], c[42], c[43], c[44], c[45], c[46], c[47], c[0], c[1], c[2], c[18], c[19], c[20], c[48], c[49], c[50], c[3], c[4], c[5], c[21], c[22], c[23], c[51], c[52], c[53], c[6], c[7], c[8], c[24], c[25], c[26], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17], c[27], c[28], c[29], c[30], c[31], c[32], c[33], c[34], c[35])
 }
 func display_i(c []int) string {
-	return fmt.Sprintf("         %2d %2d %2d\n         %2d %2d %2d\n         %2d %2d %2d\n\n%2d %2d %2d  %2d %2d %2d  %2d %2d %2d\n%2d %2d %2d  %2d %2d %2d  %2d %2d %2d\n%2d %2d %2d  %2d %2d %2d  %2d %2d %2d\n\n         %2d %2d %2d\n         %2d %2d %2d\n         %2d %2d %2d\n\n         %2d %2d %2d\n         %2d %2d %2d\n         %2d %2d %2d", c[36], c[37], c[38], c[39], c[40], c[41], c[42], c[43], c[44], c[45], c[46], c[47], c[0], c[1], c[2], c[18], c[19], c[20], c[48], c[49], c[50], c[3], c[4], c[5], c[21], c[22], c[23], c[51], c[52], c[53], c[6], c[7], c[8], c[24], c[25], c[26], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17], c[27], c[28], c[29], c[30], c[31], c[32], c[33], c[34], c[35])
+	return fmt.Sprintf("          %2d %2d %2d\n          %2d %2d %2d\n          %2d %2d %2d\n\n%2d %2d %2d  %2d %2d %2d  %2d %2d %2d\n%2d %2d %2d  %2d %2d %2d  %2d %2d %2d\n%2d %2d %2d  %2d %2d %2d  %2d %2d %2d\n\n          %2d %2d %2d\n          %2d %2d %2d\n          %2d %2d %2d\n\n          %2d %2d %2d\n          %2d %2d %2d\n          %2d %2d %2d", c[36], c[37], c[38], c[39], c[40], c[41], c[42], c[43], c[44], c[45], c[46], c[47], c[0], c[1], c[2], c[18], c[19], c[20], c[48], c[49], c[50], c[3], c[4], c[5], c[21], c[22], c[23], c[51], c[52], c[53], c[6], c[7], c[8], c[24], c[25], c[26], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17], c[27], c[28], c[29], c[30], c[31], c[32], c[33], c[34], c[35])
 }
 func display_c(c []int) string {
 	return display_s(color_cube(c))
 }
 
+func comp_int_arr(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func test() {
+	for f := range MOVES {
+		if !comp_int_arr(make_move(Move{f, 1}, make_move(Move{f, 0}, SOLVED)), SOLVED) {
+			fmt.Println("error in move and back", f)
+		}
+		if !comp_int_arr(
+			make_moves([]Move{Move{f, 0}, Move{f, 0}, Move{f, 0}, Move{f, 0}}, SOLVED),
+			SOLVED) {
+			fmt.Println("error in move around forward", f)
+		}
+		if !comp_int_arr(
+			make_moves([]Move{Move{f, 1}, Move{f, 1}, Move{f, 1}, Move{f, 1}}, SOLVED),
+			SOLVED) {
+			fmt.Println("error in move around backward", f)
+		}
+	}
+	for f := range SHIFTS {
+		if !comp_int_arr(make_shift(Move{f, 1}, make_shift(Move{f, 0}, SOLVED)), SOLVED) {
+			fmt.Println("error in shift and back", f)
+		}
+		if !comp_int_arr(
+			make_shifts([]Move{Move{f, 0}, Move{f, 0}, Move{f, 0}, Move{f, 0}}, SOLVED),
+			SOLVED) {
+			fmt.Println("error in shift around forward", f)
+		}
+		if !comp_int_arr(
+			make_shifts([]Move{Move{f, 1}, Move{f, 1}, Move{f, 1}, Move{f, 1}}, SOLVED),
+			SOLVED) {
+			fmt.Println("error in shift around backward", f)
+		}
+	}
+	for si := 0; si < 100; si++ {
+		c, moves := scramble(SOLVED, 100)
+		if !comp_int_arr(make_moves_rev(moves, c), SOLVED) {
+			fmt.Println("error in scramble/reverse")
+		}
+	}
+}
+
 func main() {
-	fmt.Println(display_c(SOLVED))
-	fmt.Println(display_i(SOLVED))
+	test()
 }
