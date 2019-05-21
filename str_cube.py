@@ -1,4 +1,12 @@
 import random
+import sys
+if len(sys.argv) == 1:
+    seed = random.randint(0, 1000000000)
+    print("seed:", seed)
+else:
+    seed = int(sys.argv[1])
+random.seed(seed)
+
 colors = ('w', 'o', 'g', 'y', 'r', 'b')
 TOP = 0
 FRONT = 1
@@ -26,7 +34,7 @@ LEFT = 5
 SOLVED = ''.join(c*9 for c in colors)
 
 def color_cube(c):
-    return ''.join(map(colors.__getitem__, map(lambda v: v/9, c)))
+    return ''.join([colors[int(i/9)] for i in c])
 
 def display(c):
     return """          {36:>2} {37:>2} {38:>2}
@@ -77,7 +85,7 @@ SHIFTS = {
         15, 12,  9, 16, 13, 10, 17, 14, 11]]}
 
 def make_shift(f, d, c):
-    return map(c.__getitem__, SHIFTS[f][d])
+    return [c[i] for i in SHIFTS[f][d]]
 
 def make_shifts(shift_lst, c):
     for f, d in shift_lst:
@@ -85,7 +93,7 @@ def make_shifts(shift_lst, c):
     return c
 
 def make_shifts_rev(shift_list, c):
-    return make_shifts(map(lambda m: (m[0], (m[1]+1)%2), shift_list[::-1]), c)
+    return make_shifts([(m[0], (m[1]+1)%2) for m in shift_list[::-1]], c)
 
 def all_shifts(c):
     for f in SHIFTS:
@@ -93,7 +101,7 @@ def all_shifts(c):
         yield make_shift(f, 1, c), (f, 1)
 
 def random_shift(c):
-    f, d = random.choice(MOVES.keys()), random.randint(0, 1)
+    f, d = random.sample(MOVES.keys(), 1)[0], random.randint(0, 1)
     return make_shift(f, d, c), (f, d)
 
 MOVES = {
@@ -176,8 +184,21 @@ MOVES = {
         42, 39, 36, 43, 40, 37, 44, 41, 38,
         0 ,  1,  2, 48, 49, 50, 51, 52, 53]]}
 
+RIGHT_UP = ("right", 0)
+RIGHT_DOWN = ("right", 1)
+LEFT_UP = ("left", 0)
+LEFT_DOWN = ("left", 1)
+TOP_RIGHT = ("top", 0)
+TOP_LEFT = ("top", 1)
+BOTTOM_RIGHT = ("bottom", 0)
+BOTTOM_LEFT = ("bottom", 1)
+FRONT_RIGHT = ("front", 0)
+FRONT_LEFT = ("front", 1)
+BACK_RIGHT = ("back", 0)
+BACK_LEFT = ("back", 1)
+
 def make_move(f, d, c):
-    return map(c.__getitem__, MOVES[f][d])
+    return [c[i] for i in MOVES[f][d]]
 
 def make_moves(move_lst, c):
     for f, d in move_lst:
@@ -185,7 +206,7 @@ def make_moves(move_lst, c):
     return c
 
 def make_moves_rev(move_list, c):
-    return make_moves(map(lambda m: (m[0], (m[1]+1)%2), move_list[::-1]), c)
+    return make_moves([(m[0], (m[1]+1)%2) for m in move_list[::-1]], c)
 
 def all_moves(c):
     for f in MOVES:
@@ -193,43 +214,48 @@ def all_moves(c):
         yield make_move(f, 1, c), (f, 1)
 
 def random_move(c):
-    f, d = random.choice(MOVES.keys()), random.randint(0, 1)
+    f, d = random.sample(MOVES.keys(), 1)[0], random.randint(0, 1)
     return make_move(f, d, c), (f, d)
 
 def scramble(c, n=100):
     moves = []
-    for i in xrange(n):
+    for i in range(n):
         c, move = random_move(c)
         moves.append(move)
     return c, moves
 
+def find_piece(c, p):
+    return c.index(p)
+
+SOLVED = list(range(54))
+
 def test():
     for move in MOVES:
-        if make_move(move, 1, make_move(move, 0, range(54))) != range(54):
-            print 'error in move and back', move
-        if make_moves([(move, 0)]*4, range(54)) != range(54):
-            print 'error in move around forward', move
-        if make_moves([(move, 1)]*4, range(54)) != range(54):
-            print 'error in move around backward', move
+        if make_move(move, 1, make_move(move, 0, SOLVED)) != SOLVED:
+            print('error in move and back', move)
+        if make_moves([(move, 0)]*4, SOLVED) != SOLVED:
+            print('error in move around forward', move)
+        if make_moves([(move, 1)]*4, SOLVED) != SOLVED:
+            print('error in move around backward', move)
         if len(set(MOVES[move][0])) != 54:
-            print 'error in', move, 0
+            print('error in', move, 0)
         if len(set(MOVES[move][1])) != 54:
-            print 'error in', move, 1
+            print('error in', move, 1)
     for shift in SHIFTS:
-        if make_shift(shift, 1, make_shift(shift, 0, range(54))) != range(54):
-            print 'error in shift', shift
-        if make_shifts([(shift, 0)]*4, range(54)) != range(54):
-            print 'error in shift around forward', shift
-        if make_shifts([(shift, 1)]*4, range(54)) != range(54):
-            print 'error in shift around backward', shift
+        if make_shift(shift, 1, make_shift(shift, 0, SOLVED)) != SOLVED:
+            print('error in shift', shift)
+        if make_shifts([(shift, 0)]*4, SOLVED) != SOLVED:
+            print('error in shift around forward', shift)
+        if make_shifts([(shift, 1)]*4, SOLVED) != SOLVED:
+            print('error in shift around backward', shift)
         if len(set(SHIFTS[shift][0])) != 54:
-            print 'error in', shift, 0
+            print('error in', shift, 0)
         if len(set(SHIFTS[shift][1])) != 54:
-            print 'error in', shift, 1
-    for i in xrange(100):
-        c, moves = scramble(range(54))
-        if make_moves_rev(moves, c) != range(54):
-            print 'error in scramble/reverse'
+            print('error in', shift, 1)
+    for i in range(100):
+        c, moves = scramble(SOLVED)
+        if make_moves_rev(moves, c) != SOLVED:
+            print('error in scramble/reverse')
             break
 
 def main():
