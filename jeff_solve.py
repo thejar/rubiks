@@ -193,7 +193,8 @@ def jeff_solve(c):
 
         return c
     def yellow_corner_orientation(c):
-        pass
+        orient_f = [LEFT_UP, TOP_LEFT, LEFT_DOWN, TOP_RIGHT, LEFT_UP, TOP_LEFT, LEFT_DOWN]
+        orient_b = [LEFT_UP, TOP_RIGHT, LEFT_DOWN, TOP_LEFT, LEFT_UP, TOP_RIGHT, LEFT_DOWN]
     
     mask = ["*"]*54
     for i in [4, 13, 22, 31, 40, 49]:
