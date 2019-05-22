@@ -31,7 +31,7 @@ LEFT = 5
           33 34 35
 """
 
-SOLVED = ''.join(c*9 for c in colors)
+SOLVED_c = ''.join(c*9 for c in colors)
 
 def color_cube(c):
     return ''.join([colors[int(i/9)] for i in c])
@@ -55,6 +55,14 @@ def display(c):
 
 def displayc(c):
     return display(color_cube(c))
+
+CORNERS = {(0, 42, 47), (2, 18, 44), (6, 9, 53), (8, 11, 24),
+        (15, 27, 51), (17, 26, 29), (20, 35, 38), (33, 36, 45)}
+i_CORNERS = {}
+for a, b, c in CORNERS:
+    i_CORNERS[a] = (a, b, c)
+    i_CORNERS[b] = (a, b, c)
+    i_CORNERS[c] = (a, b, c)
 
 SHIFTS = {
     'vert': [[
@@ -228,6 +236,16 @@ def find_piece(c, p):
     return c.index(p)
 
 SOLVED = list(range(54))
+
+def match(mask, c):
+    for m, p, s in zip(mask, c, SOLVED):
+        if not (m == '*' or (m == 'c' and p//9 == s//9) or p == s):
+            if m == 'c':
+                print("expected", colors[s//9], "but was", colors[p//9], "at s="+str(s))
+            else:
+                print("expecting %s but got %s" % (s, p))
+            return False
+    return True
 
 def test():
     for move in MOVES:

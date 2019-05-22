@@ -89,16 +89,9 @@ def jeff_solve(c):
                 52: [FRONT_LEFT, BOTTOM_RIGHT, FRONT_RIGHT, BOTTOM_RIGHT, LEFT_DOWN, BOTTOM_LEFT, LEFT_UP, BOTTOM_RIGHT, FRONT_RIGHT, BOTTOM_LEFT, FRONT_LEFT, BOTTOM_LEFT, RIGHT_DOWN, BOTTOM_RIGHT, RIGHT_UP],
             }
         for p in [14, 19, 39, 52]:
-            #print(p)
-            #print(display(c))
-            #print()
             loc = find_piece(c, p)
-            #print(loc)
             moves = from_p_to_edge[loc]
             c = make_moves(moves, c)
-            #print(display(c))
-            #print()
-            #print("--------------------------")
             c = make_shift("side", 1, c)
         return c
 
@@ -141,27 +134,145 @@ def jeff_solve(c):
         return c
 
     def bottom_edges(c):
-        pass
+        rotate_tri = [RIGHT_DOWN, BOTTOM_LEFT, RIGHT_UP, BOTTOM_LEFT, RIGHT_DOWN, BOTTOM_RIGHT, BOTTOM_RIGHT, RIGHT_UP]
+        while c[16] != 16:
+            c = make_move(*BOTTOM_RIGHT, c)
+        if c[23] == 23:
+            if c[37] == 37:
+                return c
+            c = make_move(*BOTTOM_LEFT, c)
+            c = make_shifts([("side", 0)] * 2, c)
+            c = make_moves(rotate_tri, c)
+            c = make_shifts([("side", 0)] * 2, c)
+            return c
+        if c[48] == 48:
+            c = make_move(*BOTTOM_RIGHT, c)
+            c = make_shifts([("side", 0)] * 2, c)
+            c = make_moves(rotate_tri*2, c)
+            c = make_shifts([("side", 0)] * 2, c)
+            return c
+        if c[37] == 37:
+            c = make_moves(rotate_tri, c)
+            c = make_move(*BOTTOM_LEFT, c)
+            c = make_shifts([("side", 0)] * 2, c)
+            c = make_moves(rotate_tri, c)
+            c = make_shifts([("side", 0)] * 2, c)
+            return c
+        c = make_moves(rotate_tri, c)
+        if c[23] == 23:
+            return c
+        c = make_moves(rotate_tri, c)
+        return c
+
     def yellow_corner_permutation(c):
-        pass
+        perm_f = [RIGHT_DOWN, BOTTOM_RIGHT, LEFT_DOWN, BOTTOM_LEFT, RIGHT_UP, BOTTOM_RIGHT, LEFT_UP, BOTTOM_LEFT]
+        perm_b = [LEFT_DOWN, BOTTOM_LEFT, RIGHT_DOWN, BOTTOM_RIGHT, LEFT_UP, BOTTOM_LEFT, RIGHT_UP, BOTTOM_RIGHT]
+        #print(display(c))
+        s_corner = i_CORNERS[find_piece(c, 15)][0]
+        #print(s_corner)
+        if s_corner == 15:
+            # great
+            pass
+        elif s_corner == 17:
+            c = make_moves(perm_f + perm_b, c)
+        elif s_corner == 20:
+            c = make_moves(perm_b, c)
+        elif s_corner == 33:
+            c = make_moves(perm_b * 2, c)
+        else:
+            print("Error, corner in unexpected place!", s_corner)
+        #print(display(c))
+        #input(":")
+
+        # tl corner is in place
+        while i_CORNERS[find_piece(c, 17)][0] != 17:
+            c = make_moves(perm_f, c)
+            #print(find_piece(c, 17))
+            #print(display(c))
+            #input(":")
+
+        return c
     def yellow_corner_orientation(c):
         pass
     
+    mask = ["*"]*54
+    for i in [4, 13, 22, 31, 40, 49]:
+        mask[i] = '-'
+
+    if not match(mask, c):
+        print("mismatch!")
+        print(display(c))
+        return
+
     c = white_cross(c)
     print("stage 1")
     print(display(color_cube(c)))
+    for i in [1, 3, 5, 7, 10, 21, 43, 50]:
+        mask[i] = '-'
+    if not match(mask, c):
+        print("mismatch!")
+        print(display(c))
+        return
+
     c = white_corners(c)
     print("stage 2")
     print(display(color_cube(c)))
+    for i in [0, 2, 6, 8, 9, 11, 18, 24, 42, 44, 47, 53]:
+        mask[i] = '-'
+    if not match(mask, c):
+        print("mismatch!")
+        print(display(c))
+        return
+
     c = side_edges(c)
     print("stage 3")
     print(display(color_cube(c)))
+    for i in [12, 14, 19, 25, 39, 41, 46, 52]:
+        mask[i] = '-'
+    if not match(mask, c):
+        print("mismatch!")
+        print(display(c))
+        return
+
     c = yellow_cross(c)
     print("stage 4")
     print(display(color_cube(c)))
-    #c = bottom_edges(c)
-    #c = yellow_corner_permutation(c)
+    for i in [28, 30, 32, 34]:
+        mask[i] = 'c'
+    if not match(mask, c):
+        print("mismatch!")
+        print(display(c))
+        return
+
+    c = bottom_edges(c)
+    print("stage 5")
+    print(display(color_cube(c)))
+    for i in [16, 23, 28, 30, 32, 34, 37, 48]:
+        mask[i] = '-'
+    if not match(mask, c):
+        print("mismatch!")
+        print(display(c))
+        return
+
+    c = yellow_corner_permutation(c)
+    print("stage 6")
+    print(display(color_cube(c)))
+    print(display(c))
+    #for i in [16, 23, 28, 30, 32, 34, 37, 48]:
+    #    mask[i] = '-'
+    #if not match(mask, c):
+    #    print("mismatch!")
+    #    print(display(c))
+    #    return
+
     #c = yellow_corner_orientation(c)
+    #print("solved!")
+    #print(display(color_cube(c)))
+    #if not match('-'*54, c):
+    #    print("mismatch!")
+    #    print(display(c))
+    #    return
+
     
 c, moves = scramble(range(54))
 jeff_solve(c)
