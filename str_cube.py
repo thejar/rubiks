@@ -2,9 +2,9 @@ import random
 import sys
 if len(sys.argv) == 1:
     seed = random.randint(0, 1000000000)
-    print("seed:", seed)
 else:
     seed = int(sys.argv[1])
+print("seed:", seed)
 random.seed(seed)
 
 colors = ('w', 'o', 'g', 'y', 'r', 'b')

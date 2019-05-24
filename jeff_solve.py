@@ -195,6 +195,55 @@ def jeff_solve(c):
     def yellow_corner_orientation(c):
         orient_f = [LEFT_UP, TOP_LEFT, LEFT_DOWN, TOP_RIGHT, LEFT_UP, TOP_LEFT, LEFT_DOWN]
         orient_b = [LEFT_UP, TOP_RIGHT, LEFT_DOWN, TOP_LEFT, LEFT_UP, TOP_RIGHT, LEFT_DOWN]
+
+        last = 'c'
+        
+        if c[15] == 51: # y
+            c = make_moves(orient_b, c)
+            last += 'b'
+        elif c[15] == 27:
+            c = make_moves(orient_f, c)
+            last += 'f'
+        c = make_move(*BOTTOM_LEFT, c)
+        
+        if c[15] == 17:
+            if last[-1] == 'b':
+                c = make_move(*TOP_LEFT, c)
+            last += 'b'
+            c = make_moves(orient_b, c)
+        elif c[15] == 29: # y
+            if last[-1] == 'f':
+                c = make_move(*TOP_RIGHT, c)
+            last += 'f'
+            c = make_moves(orient_f, c)
+        c = make_move(*BOTTOM_LEFT, c)
+        
+        if c[15] == 20:
+            if last[-1] == 'b':
+                c = make_move(*TOP_LEFT, c)
+            last += 'b'
+            c = make_moves(orient_b, c)
+        elif c[15] == 35: # y
+            if last[-1] == 'f':
+                c = make_move(*TOP_RIGHT, c)
+            last += 'f'
+            c = make_moves(orient_f, c)
+        c = make_move(*BOTTOM_LEFT, c)
+        
+        if c[15] == 36:
+            if last[-1] == 'b':
+                c = make_move(*TOP_LEFT, c)
+            last += 'b'
+            c = make_moves(orient_b, c)
+        elif c[15] == 33: # y
+            if last[-1] == 'f':
+                c = make_move(*TOP_RIGHT, c)
+            last += 'f'
+            c = make_moves(orient_f, c)
+        c = make_move(*BOTTOM_LEFT, c)
+        while c[0] != 0:
+            c = make_move(*TOP_LEFT, c)
+        return c
     
     mask = ["*"]*54
     for i in [4, 13, 22, 31, 40, 49]:
@@ -206,59 +255,54 @@ def jeff_solve(c):
         return
 
     c = white_cross(c)
-    print("stage 1")
-    print(display(color_cube(c)))
     for i in [1, 3, 5, 7, 10, 21, 43, 50]:
         mask[i] = '-'
     if not match(mask, c):
+        print("stage 1")
         print("mismatch!")
         print(display(c))
         return
 
     c = white_corners(c)
-    print("stage 2")
-    print(display(color_cube(c)))
     for i in [0, 2, 6, 8, 9, 11, 18, 24, 42, 44, 47, 53]:
         mask[i] = '-'
     if not match(mask, c):
+        print("stage 2")
         print("mismatch!")
         print(display(c))
         return
 
     c = side_edges(c)
-    print("stage 3")
-    print(display(color_cube(c)))
     for i in [12, 14, 19, 25, 39, 41, 46, 52]:
         mask[i] = '-'
     if not match(mask, c):
+        print("stage 3")
         print("mismatch!")
         print(display(c))
         return
 
     c = yellow_cross(c)
-    print("stage 4")
-    print(display(color_cube(c)))
     for i in [28, 30, 32, 34]:
         mask[i] = 'c'
     if not match(mask, c):
+        print("stage 4")
         print("mismatch!")
         print(display(c))
         return
 
     c = bottom_edges(c)
-    print("stage 5")
-    print(display(color_cube(c)))
     for i in [16, 23, 28, 30, 32, 34, 37, 48]:
         mask[i] = '-'
     if not match(mask, c):
+        print("stage 5")
         print("mismatch!")
         print(display(c))
         return
 
     c = yellow_corner_permutation(c)
-    print("stage 6")
-    print(display(color_cube(c)))
-    print(display(c))
+    #print("stage 6")
+    #print(display(color_cube(c)))
+    #print(display(c))
     #for i in [16, 23, 28, 30, 32, 34, 37, 48]:
     #    mask[i] = '-'
     #if not match(mask, c):
@@ -266,13 +310,13 @@ def jeff_solve(c):
     #    print(display(c))
     #    return
 
-    #c = yellow_corner_orientation(c)
-    #print("solved!")
-    #print(display(color_cube(c)))
-    #if not match('-'*54, c):
-    #    print("mismatch!")
-    #    print(display(c))
-    #    return
+    c = yellow_corner_orientation(c)
+    print("solved!")
+    print(display(color_cube(c)))
+    if not match('-'*54, c):
+        print("mismatch!")
+        print(display(c))
+        return
 
     
 c, moves = scramble(range(54))
