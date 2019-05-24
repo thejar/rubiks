@@ -205,7 +205,11 @@ FRONT_LEFT = ("front", 1)
 BACK_RIGHT = ("back", 0)
 BACK_LEFT = ("back", 1)
 
+moves_made = []
+def clear_moves():
+    moves_made.clear()
 def make_move(f, d, c):
+    moves_made.append((f, d))
     return [c[i] for i in MOVES[f][d]]
 
 def make_moves(move_lst, c):

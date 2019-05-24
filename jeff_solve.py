@@ -1,4 +1,5 @@
 from str_cube import *
+from bfs_solve import double_bfs_solve
 
 def jeff_solve(c):
     def white_cross(c):
@@ -244,6 +245,8 @@ def jeff_solve(c):
         while c[0] != 0:
             c = make_move(*TOP_LEFT, c)
         return c
+
+    clear_moves()
     
     mask = ["*"]*54
     for i in [4, 13, 22, 31, 40, 49]:
@@ -253,6 +256,8 @@ def jeff_solve(c):
         print("mismatch!")
         print(display(c))
         return
+
+    print(display(color_cube(c)))
 
     c = white_cross(c)
     for i in [1, 3, 5, 7, 10, 21, 43, 50]:
@@ -313,6 +318,8 @@ def jeff_solve(c):
     c = yellow_corner_orientation(c)
     print("solved!")
     print(display(color_cube(c)))
+    #print('\n'.join(map(str, moves_made)))
+    print(len(moves_made))
     if not match('-'*54, c):
         print("mismatch!")
         print(display(c))
@@ -320,4 +327,6 @@ def jeff_solve(c):
 
     
 c, moves = scramble(range(54))
-jeff_solve(c)
+
+if not double_bfs_solve(c, 8):
+    jeff_solve(c)
